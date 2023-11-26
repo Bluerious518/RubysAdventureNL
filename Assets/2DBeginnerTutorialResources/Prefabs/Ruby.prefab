@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 1779152202682197215}
   m_Layer: 8
   m_Name: Ruby
-  m_TagString: Untagged
+  m_TagString: RubyController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -109,6 +109,9 @@ MonoBehaviour:
   projectilePrefab: {fileID: 7182932275369440285, guid: cd22c137ea1eee34c9cb7d52f4e15125, type: 3}
   hitSound: {fileID: 8300000, guid: 9b1bb1f450b7d444fa4a8019d13519a7, type: 3}
   throwSound: {fileID: 8300000, guid: b2edfd40873655249ba0e01a5cf705be, type: 3}
+  score: 0
+  scoreTextObject: {fileID: 0}
+  gameOverText: {fileID: 0}
 --- !u!50 &7768727300732280797
 Rigidbody2D:
   serializedVersion: 4

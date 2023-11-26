@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class RubyController : MonoBehaviour
 {
@@ -30,19 +32,40 @@ public class RubyController : MonoBehaviour
     public AudioClip hitSound;
     public AudioClip throwSound;
 
+    public int score;
+    public GameObject scoreTextObject;
+    TextMeshProUGUI scoreText;
+
+    public GameObject gameOverText;
+    bool gameOver;
+
+
     // Start is called before the first frame update
     void Start()
     {
+        gameOver = false;
         rigidbody2d = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
         animator = GetComponent<Animator>();
-
+    
         audioSource= GetComponent<AudioSource>();
+
+        TextMeshProUGUI scoreTextComponent = scoreTextObject.GetComponentInChildren<TextMeshProUGUI>();
+
+        if (scoreTextComponent != null)
+        {
+             scoreText = scoreTextComponent;
+        }
+        else
+        {
+            Debug.LogError("No TextMeshProUGUI component found in the children of scoreTextObject.");
+        }    
     }
 
     // Update is called once per frame
     void Update()
     {
+
         horizontal = Input.GetAxis("Horizontal");
         vertical = Input.GetAxis("Vertical");
 
@@ -67,11 +90,16 @@ public class RubyController : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.C))
         {
-            Launch();
+            if (gameOver == false)
+            {
+                Launch();
+            }
         }
 
         if(Input.GetKeyDown(KeyCode.X))
         {
+            if (gameOver == false)
+            {
             RaycastHit2D hit = Physics2D.Raycast(rigidbody2d.position + Vector2.up * 0.2f, lookDirection, 1.5f, LayerMask.GetMask("NPC"));
             if(hit.collider != null)
             {
@@ -81,11 +109,36 @@ public class RubyController : MonoBehaviour
                     character.DisplayDialog();
                 }
             }
+            }
         }
+
+        if (currentHealth == 0)
+        {
+            gameOverText.SetActive(true);
+            gameOverText.GetComponent<TextMeshProUGUI>().SetText("You lost! Press R to Restart!");
+            gameOver = true;
+            speed = 0.0f;
+        }
+
+        if (score == 2)
+        {
+            gameOverText.SetActive(true);
+            gameOverText.GetComponent<TextMeshProUGUI>().SetText("You win! Game created by Group 32");
+            speed = 0.0f;
+        }
+
+        if (Input.GetKey(KeyCode.R))
+            {
+                if (gameOver == true)
+                {
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                }
+            }
     }
 
     void FixedUpdate()
     {
+        
         Vector2 position = rigidbody2d.position;
         position.x = position.x + speed * horizontal * Time.deltaTime; 
         position.y = position.y + speed * vertical * Time.deltaTime;
@@ -116,6 +169,24 @@ public class RubyController : MonoBehaviour
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
         UIHealthBar.instance.SetValue(currentHealth / (float)maxHealth);
+    }
+
+    public void ChangeScore(int scoreAmount)
+    {
+        if (scoreAmount > 0)
+        {
+            score = score + scoreAmount;
+        } 
+
+        if (scoreText != null)
+        {
+            scoreText.text = "Fixed Robots: " + score.ToString();
+        }
+        else
+        {
+            Debug.LogError("scoreText is not assigned. Make sure scoreTextObject has a TextMeshProUGUI component.");
+        }
+        
     }
 
     void Launch()
