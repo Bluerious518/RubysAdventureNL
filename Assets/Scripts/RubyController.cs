@@ -18,6 +18,15 @@ public class RubyController : MonoBehaviour
     float invincibleTimer;
     public ParticleSystem hurtEffect;
     public ParticleSystem healEffect;
+    public ParticleSystem speedEffect;
+
+    bool isSpeed;
+    float speedTimer;
+    public float timeSpeed = 5.0f;
+
+    bool isDelay;
+    float delayTimer;
+    public float timeDelay = 2.0f;
 
     Rigidbody2D rigidbody2d;
     float horizontal;
@@ -31,6 +40,9 @@ public class RubyController : MonoBehaviour
     AudioSource audioSource;
     public AudioClip hitSound;
     public AudioClip throwSound;
+    public AudioClip fixSound;
+    public AudioClip winSound;
+    public AudioClip loseSound;
 
     public int score;
     public GameObject scoreTextObject;
@@ -38,12 +50,14 @@ public class RubyController : MonoBehaviour
 
     public GameObject gameOverText;
     bool gameOver;
+    bool gameWin;
 
 
     // Start is called before the first frame update
     void Start()
     {
         gameOver = false;
+        gameWin = false;
         rigidbody2d = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
         animator = GetComponent<Animator>();
@@ -88,12 +102,31 @@ public class RubyController : MonoBehaviour
                 isInvincible = false;
         }
 
+        if (isSpeed)
+        {
+            speedTimer -= Time.deltaTime;
+
+            if (speedTimer < 0)
+            {
+                isSpeed = false;
+                speed = Mathf.Max(speed-2.0f, 0.0f);
+            }
+        }
+
         if(Input.GetKeyDown(KeyCode.C))
         {
             if (gameOver == false)
             {
                 Launch();
             }
+        }
+
+        if (isDelay)
+        {
+            delayTimer -= Time.deltaTime;
+
+            if (delayTimer <= 0)
+            isDelay = false;
         }
 
         if(Input.GetKeyDown(KeyCode.X))
@@ -112,19 +145,22 @@ public class RubyController : MonoBehaviour
             }
         }
 
-        if (currentHealth == 0)
+        if (currentHealth == 0 && !gameOver)
         {
             gameOverText.SetActive(true);
             gameOverText.GetComponent<TextMeshProUGUI>().SetText("You lost! Press R to Restart!");
             gameOver = true;
             speed = 0.0f;
+            PlaySound(loseSound);
         }
 
-        if (score == 2)
+        if (score == 3 && !gameWin)
         {
             gameOverText.SetActive(true);
-            gameOverText.GetComponent<TextMeshProUGUI>().SetText("You win! Game created by Group 32");
+            gameOverText.GetComponent<TextMeshProUGUI>().SetText("You win! Game created by Group 32.");
             speed = 0.0f;
+            gameWin = true;
+            PlaySound (winSound);
         }
 
         if (Input.GetKey(KeyCode.R))
@@ -171,11 +207,26 @@ public class RubyController : MonoBehaviour
         UIHealthBar.instance.SetValue(currentHealth / (float)maxHealth);
     }
 
+    public void ChangeSpeed (int speedAmount)
+    {
+        if (speedAmount > 0)
+        {
+            Instantiate(speedEffect, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity, rigidbody2d.transform);
+            speedTimer = timeSpeed;
+            if (isSpeed == true)
+            return;
+            isSpeed = true;
+            speed = (speed + speedAmount);
+            
+        }
+    }
+
     public void ChangeScore(int scoreAmount)
     {
         if (scoreAmount > 0)
         {
             score = score + scoreAmount;
+            PlaySound(fixSound);
         } 
 
         if (scoreText != null)
@@ -191,13 +242,20 @@ public class RubyController : MonoBehaviour
 
     void Launch()
     {
+        
+        if (isDelay)
+        return;
+        isDelay = true;
+        delayTimer = timeDelay;  
         GameObject projectileObject = Instantiate(projectilePrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
         Projectile projectile = projectileObject.GetComponent<Projectile>();
         projectile.Launch(lookDirection, 300);
 
         animator.SetTrigger("Launch");
 
-        PlaySound(throwSound);    
+        PlaySound(throwSound);  
+        
+
     }
 
     public void PlaySound(AudioClip clip)

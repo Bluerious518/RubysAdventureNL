@@ -7,12 +7,17 @@ public class NonPlayerCharacter : MonoBehaviour
     public float displayTime = 4.0f;
     public GameObject dialogBox;
     float timerDisplay;
+    AudioSource source;
 
     // Start is called before the first frame update
     void Start()
     {
         dialogBox.SetActive(false);
         timerDisplay = -1.0f;
+    }
+    void Awake()
+    {
+        source = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -32,5 +37,6 @@ public class NonPlayerCharacter : MonoBehaviour
     {
         timerDisplay = displayTime;
         dialogBox.SetActive(true);
+        source.Play();
     }
 }

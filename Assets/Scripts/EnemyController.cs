@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
+
     public float speed = 3.0f;
     public bool vertical;
     public float changeTime = 3.0f;
@@ -104,9 +105,12 @@ public class EnemyController : MonoBehaviour
         animator.SetTrigger("Fixed");
         smokeEffect.Stop();
 
+
+
         if (rubyController != null)
         {
             rubyController.ChangeScore(1);
+
         }
      }
 }
